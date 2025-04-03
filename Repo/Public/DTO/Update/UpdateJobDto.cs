@@ -1,7 +1,7 @@
-﻿namespace Repo.Public.DTO
+﻿namespace Repo.Public.DTO.Update
 {
-	public class JobDto
-	{
+	public class UpdateJobDto
+    {
 		public long Id { get; set; }
 		public string? Name { get; set; }
 
