@@ -9,7 +9,7 @@ namespace Repo.Internal.Uow
 
 		public UnitOfWork(DbDomainContext domainContext)
 		{
-			ArgumentNullException.ThrowIfNull(domainContext, nameof(domainContext));
+			ArgumentNullException.ThrowIfNull(domainContext);
 
 			_domainContext = domainContext;
 			_domainContext.Database.BeginTransaction();

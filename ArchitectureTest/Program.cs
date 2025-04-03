@@ -1,29 +1,50 @@
-﻿using Repo.Public.Repos;
+﻿using Microsoft.Extensions.DependencyInjection;
+using Repo.Internal.DomainContext;
+using Repo.Public.Repos;
+using Repo.Public.Specs;
 using Repo.Public.Specs.JobSpec;
 using Repo.Public.UOW;
+using Results;
 
 namespace ArchitectureTest
 {
 	internal class Program
     {
+        static Result<string> Test(bool success)
+        {
+            string res = $"success = {success}";
+            return success ? Result<string>.Success(res) : Result<string>.Fail("503", "InternalError");
+        }
+
         static void Main(string[] args)
         {
-			// Concrete classes used here would be dependency injected as interfaces.
-            // Casting to interfaces here to make it similar to DI.
-			// Also, implement all EF Core specific in it's own library.
+            // TODO: try error codes (result, Error)
+            var res1 = Test(true);
+            var res2 = Test(false);
 
-			var uowFactory = new UnitOfWorkFactorySqLite() as IUnitOfWorkFactory;
+            var serviceProvider = BuildServiceProvider();
 
-			using var uow = uowFactory.CreateUnitOfWork();
+            var jobRepo = serviceProvider.GetRequiredService<IJobRepo>();
 
-			var jobRepo = new JobRepo(uowFactory) as IJobRepo;
+			var singleJobWithChildrenSpec = new JobSpecGetById(id: 1, childrenInclude: ChildrenInclude.Nested);
+			var jobWithChildren = jobRepo.List(singleJobWithChildrenSpec).SingleOrDefault();
 
-			var singleJobWithChildrenSpec = new SingleJobWithChildrenSpec(id: 1);
-			var jobWithChildren = jobRepo.All(singleJobWithChildrenSpec, uow).SingleOrDefault();
+			Console.WriteLine(jobWithChildren);
+        }
 
-			uow.Cancel();
 
-			Console.WriteLine("Hello, World!");
+
+
+		private static IServiceProvider BuildServiceProvider()
+		{
+            // .Use[xxx] pattern to hide implementation details.
+            var serviceProvider = new ServiceCollection().
+                AddSingleton<IDbContextFactory, DbSqLiteContextFactory>().
+                AddSingleton<IUnitOfWorkFactory, UnitOfWorkFactory>().
+                AddSingleton<IJobRepo, JobRepo>().
+                BuildServiceProvider();
+
+            return serviceProvider;
         }
     }
 }

@@ -1,28 +1,25 @@
-﻿using Repo.Mappers;
+﻿using Repo.Internal.DomainContext;
+using Repo.Mappers;
 using Repo.Public.DTO;
 using Repo.Public.Specs;
-using Repo.Public.UOW;
 
 namespace Repo.Public.Repos
 {
 	public class JobRepo : IJobRepo
 	{
-		private readonly IUnitOfWorkFactory _unitOfWorkFactory;
+		private readonly IDbContextFactory _dbContextFactory;
 
-		public JobRepo(IUnitOfWorkFactory unitOfWorkFactory)
+		public JobRepo(IDbContextFactory dbContextFactory)
 		{
-			_unitOfWorkFactory = unitOfWorkFactory;
+			_dbContextFactory = dbContextFactory;
 		}
 
-		public IEnumerable<JobDto> All(IJobSpec jobSpec, IUnitOfWork? unitOfWork = null)
+		public IEnumerable<JobDto> List(IJobSpec jobSpec)
 		{
-			unitOfWork = unitOfWork ?? _unitOfWorkFactory.CreateUnitOfWork();
-			var job = jobSpec.Execute(unitOfWork.Context).FirstOrDefault();
-			if (job is null)
-				return [];
+			using var context = _dbContextFactory.CreateDbContext();
 
-			var jobDto = EntityToDtoMappers.ToDto(job);
-			return [jobDto];
+			var job = jobSpec.Execute(context).FirstOrDefault();
+			return job is null ? [] : [EntityToDtoMappers.ToDto(job)];
 		}
 	}
 }

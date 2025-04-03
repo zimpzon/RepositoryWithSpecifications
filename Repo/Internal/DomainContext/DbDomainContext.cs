@@ -1,6 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Repo.Internal.Entities;
-using System.Runtime.CompilerServices;
 
 namespace Repo.Internal.DomainContext
 {
