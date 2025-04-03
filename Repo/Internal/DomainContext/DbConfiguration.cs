@@ -3,7 +3,7 @@ using Repo.Internal.Entities;
 
 namespace Repo.Internal.DomainContext
 {
-	internal class DbConfiguration
+	internal static class DbConfiguration
 	{
 		public static void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
 		{
@@ -13,7 +13,7 @@ namespace Repo.Internal.DomainContext
 			}
 		}
 
-		public static void OnModelCreating(ModelBuilder modelBuilder)
+        public static void OnModelCreating(ModelBuilder modelBuilder)
 		{
 			// Employee configuration
 			modelBuilder.Entity<Employee>(entity =>

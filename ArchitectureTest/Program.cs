@@ -16,7 +16,7 @@ namespace ArchitectureTest
             return success ? Result<string>.Success(res) : Result<string>.Fail("503", "InternalError");
         }
 
-        static void Main(string[] args)
+        static async Task Main(string[] args)
         {
             // TODO: try error codes (result, Error)
             var res1 = Test(true);
@@ -27,13 +27,10 @@ namespace ArchitectureTest
             var jobRepo = serviceProvider.GetRequiredService<IJobRepo>();
 
 			var singleJobWithChildrenSpec = new JobSpecGetById(id: 1, childrenInclude: ChildrenInclude.Nested);
-			var jobWithChildren = jobRepo.List(singleJobWithChildrenSpec).SingleOrDefault();
+			var jobWithChildren = (await jobRepo.List(singleJobWithChildrenSpec)).SingleOrDefault();
 
 			Console.WriteLine(jobWithChildren);
         }
-
-
-
 
 		private static IServiceProvider BuildServiceProvider()
 		{
@@ -43,6 +40,10 @@ namespace ArchitectureTest
                 AddSingleton<IUnitOfWorkFactory, UnitOfWorkFactory>().
                 AddSingleton<IJobRepo, JobRepo>().
                 BuildServiceProvider();
+
+            var dbContextFactory = serviceProvider.GetRequiredService<IDbContextFactory>();
+            using var context = dbContextFactory.CreateDbContext();
+            context.SeedTestData();
 
             return serviceProvider;
         }

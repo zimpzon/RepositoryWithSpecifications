@@ -1,4 +1,5 @@
-﻿using Repo.Internal.DomainContext;
+﻿using Microsoft.EntityFrameworkCore;
+using Repo.Internal.DomainContext;
 using Repo.Mappers;
 using Repo.Public.DTO;
 using Repo.Public.Specs;
@@ -14,13 +15,17 @@ namespace Repo.Public.Repos
 			_dbContextFactory = dbContextFactory;
 		}
 
-		public IEnumerable<JobDto> List(IJobSpec jobSpec)
+		public async Task<IEnumerable<JobDto>> List(IJobSpec jobSpec)
 		{
 			using var context = _dbContextFactory.CreateDbContext();
 
-			var job = jobSpec.Execute(context).FirstOrDefault();
-			return job is null ? [] : [EntityToDtoMappers.ToDto(job)];
+			var jobs = await jobSpec.Execute(context).ToListAsync();
+			return jobs.Select(j => EntityToDtoMappers.ToDto(j));
 		}
 
-	}
+        public Task<long> Save(JobDto jobDto)
+        {
+            throw new NotImplementedException();
+        }
+    }
 }
