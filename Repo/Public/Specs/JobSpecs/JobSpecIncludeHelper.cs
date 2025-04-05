@@ -17,12 +17,18 @@ namespace Repo.Public.Specs.JobSpecs
             else if (childrenInclude == ChildrenInclude.Immediate)
             {
                 // Alle immediate (level 1) includes.
-                query.Include(q => q.JobTasks).ThenInclude(jt => jt.Employees);
-                query.Include(q => q.Employees);
+                query = query.Include(q => q.JobTasks);
+                query = query.Include(q => q.Employees);
             }
-            else if (childrenInclude != ChildrenInclude.Nested)
+            else if (childrenInclude == ChildrenInclude.Nested)
             {
                 // Full tree structure of children.
+                query = query.Include(q => q.JobTasks).ThenInclude(jt => jt.Employees);
+                query = query.Include(q => q.Employees);
+            }
+            else
+            {
+                throw new InvalidOperationException($"Unknown {nameof(ChildrenInclude)}: {childrenInclude}");
             }
             return query;
         }

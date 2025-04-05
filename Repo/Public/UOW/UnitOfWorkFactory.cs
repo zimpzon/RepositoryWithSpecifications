@@ -1,5 +1,4 @@
-﻿using Microsoft.EntityFrameworkCore;
-using Repo.Internal.DomainContext;
+﻿using Repo.Internal.DomainContext;
 using Repo.Internal.Uow;
 
 namespace Repo.Public.UOW
